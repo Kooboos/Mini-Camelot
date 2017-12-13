@@ -101,6 +101,14 @@ board [8][4] = 1
 
 
 ##############################
+gameDisplay= pygame.display.set_mode((display_width,display_height))
+pygame.display.set_caption('Mini-Camelot')
+clock = pygame.time.Clock()
+
+
+isWinner = False
+
+##############################
 #functions
 
 def drawFromBoard(grid):
@@ -144,7 +152,7 @@ def changeSquareToColor(arrayIndex, targetValue):
     board[arrayIndex[1]][arrayIndex[0]] = targetValue
 
 #array coordinates passed in as (y,x)
-def findMoveableSquares(selectedSquare):
+def findMoveableSquares(selectedSquare, passedBoard):
     capturedPieces = []
     openMoves = []
     capturedPiecesDict = {}
@@ -160,78 +168,78 @@ def findMoveableSquares(selectedSquare):
     #check adjacent moves
     #check up
     
-    if (selectedSquare[0] >= 1 and (board[selectedSquare[0]-1][selectedSquare[1]] == 0 or board[selectedSquare[0]-1][selectedSquare[1]] == 5)):
+    if (selectedSquare[0] >= 1 and (passedBoard[selectedSquare[0]-1][selectedSquare[1]] == 0 or passedBoard[selectedSquare[0]-1][selectedSquare[1]] == 5)):
         openMoves.append([selectedSquare[0]-1,selectedSquare[1]])
     #check down
-    if (selectedSquare[0] <= 12 and (board[selectedSquare[0]+1][selectedSquare[1]] == 0 or board[selectedSquare[0]+1][selectedSquare[1]] == 5)):
+    if (selectedSquare[0] <= 12 and (passedBoard[selectedSquare[0]+1][selectedSquare[1]] == 0 or passedBoard[selectedSquare[0]+1][selectedSquare[1]] == 5)):
         openMoves.append([selectedSquare[0]+1,selectedSquare[1]])
     #check left
-    if (selectedSquare[1] >= 1 and (board[selectedSquare[0]][selectedSquare[1]-1] == 0 or board[selectedSquare[0]][selectedSquare[1]-1] == 5)):
+    if (selectedSquare[1] >= 1 and (passedBoard[selectedSquare[0]][selectedSquare[1]-1] == 0 or passedBoard[selectedSquare[0]][selectedSquare[1]-1] == 5)):
         openMoves.append([selectedSquare[0],selectedSquare[1]-1])
     #check right
-    if (selectedSquare[1] <= 6 and (board[selectedSquare[0]][selectedSquare[1]+1] == 0 or board[selectedSquare[0]][selectedSquare[1]+1] == 5)):
+    if (selectedSquare[1] <= 6 and (passedBoard[selectedSquare[0]][selectedSquare[1]+1] == 0 or passedBoard[selectedSquare[0]][selectedSquare[1]+1] == 5)):
         openMoves.append([selectedSquare[0],selectedSquare[1]+1])
     #check up/left
-    if(selectedSquare[0] >= 1 and selectedSquare[1]-1 >= 1 and (board[selectedSquare[0]-1][selectedSquare[1]-1] == 0 or board[selectedSquare[0]-1][selectedSquare[1]-1] == 5)):
+    if(selectedSquare[0] >= 1 and selectedSquare[1]-1 >= 1 and (passedBoard[selectedSquare[0]-1][selectedSquare[1]-1] == 0 or passedBoard[selectedSquare[0]-1][selectedSquare[1]-1] == 5)):
         openMoves.append([selectedSquare[0]-1,selectedSquare[1]-1])
     #check up/right
-    if(selectedSquare[0] >= 1 and selectedSquare[1]+1 <= 6 and (board[selectedSquare[0]-1][selectedSquare[1]+1] == 0 or board[selectedSquare[0]-1][selectedSquare[1]+1] == 5)):
+    if(selectedSquare[0] >= 1 and selectedSquare[1]+1 <= 6 and (passedBoard[selectedSquare[0]-1][selectedSquare[1]+1] == 0 or passedBoard[selectedSquare[0]-1][selectedSquare[1]+1] == 5)):
         openMoves.append([selectedSquare[0]-1,selectedSquare[1]+1])
     #check down/left
-    if(selectedSquare[0] <= 12 and selectedSquare[1]-1 >= 1 and (board[selectedSquare[0]+1][selectedSquare[1]-1] == 0 or board[selectedSquare[0]+1][selectedSquare[1]-1] == 5)):
+    if(selectedSquare[0] <= 12 and selectedSquare[1]-1 >= 1 and (passedBoard[selectedSquare[0]+1][selectedSquare[1]-1] == 0 or passedBoard[selectedSquare[0]+1][selectedSquare[1]-1] == 5)):
         openMoves.append([selectedSquare[0]+1,selectedSquare[1]-1])
     #check down/right
-    if(selectedSquare[0] <= 12 and selectedSquare[1]+1 <= 6 and (board[selectedSquare[0]+1][selectedSquare[1]+1] == 0 or board[selectedSquare[0]+1][selectedSquare[1]+1] == 5)):
+    if(selectedSquare[0] <= 12 and selectedSquare[1]+1 <= 6 and (passedBoard[selectedSquare[0]+1][selectedSquare[1]+1] == 0 or passedBoard[selectedSquare[0]+1][selectedSquare[1]+1] == 5)):
         openMoves.append([selectedSquare[0]+1,selectedSquare[1]+1])
 
     #check jumps. If jump, add 'in between piece' to list of 'capturedPieces'
 
     #check up jump
-    if (selectedSquare[0] >= 2 and (board[selectedSquare[0]-2][selectedSquare[1]] == 0 or board[selectedSquare[0]-2][selectedSquare[1]] == 5) and (board[selectedSquare[0]-1][selectedSquare[1]] == 2 or board[selectedSquare[0]-1][selectedSquare[1]] == 1)):
+    if (selectedSquare[0] >= 2 and (passedBoard[selectedSquare[0]-2][selectedSquare[1]] == 0 or passedBoard[selectedSquare[0]-2][selectedSquare[1]] == 5) and (passedBoard[selectedSquare[0]-1][selectedSquare[1]] == 2 or passedBoard[selectedSquare[0]-1][selectedSquare[1]] == 1)):
         openMoves.append([selectedSquare[0]-2,selectedSquare[1]])
-        if(board[selectedSquare[0]-1][selectedSquare[1]] == enemy):
+        if(passedBoard[selectedSquare[0]-1][selectedSquare[1]] == enemy):
             capturedPiecesDict[str([selectedSquare[0]-1,selectedSquare[1]])] = len(openMoves) -1
             capturedPieces.append([selectedSquare[0]-1,selectedSquare[1]])
     #check down jump
-    if (selectedSquare[0] <= 11 and (board[selectedSquare[0]+2][selectedSquare[1]] == 0 or board[selectedSquare[0]+2][selectedSquare[1]] == 5) and (board[selectedSquare[0]+1][selectedSquare[1]] == 2 or board[selectedSquare[0]+1][selectedSquare[1]] == 1)):
+    if (selectedSquare[0] <= 11 and (passedBoard[selectedSquare[0]+2][selectedSquare[1]] == 0 or passedBoard[selectedSquare[0]+2][selectedSquare[1]] == 5) and (passedBoard[selectedSquare[0]+1][selectedSquare[1]] == 2 or passedBoard[selectedSquare[0]+1][selectedSquare[1]] == 1)):
         openMoves.append([selectedSquare[0]+2,selectedSquare[1]])
-        if(board[selectedSquare[0]+1][selectedSquare[1]] == enemy):
+        if(passedBoard[selectedSquare[0]+1][selectedSquare[1]] == enemy):
             capturedPiecesDict[str([selectedSquare[0]+1,selectedSquare[1]])] = len(openMoves) -1
             capturedPieces.append([selectedSquare[0]+1,selectedSquare[1]])
     #check left jump
-    if (selectedSquare[1] >= 2 and (board[selectedSquare[0]][selectedSquare[1]-2] == 0 or board[selectedSquare[0]][selectedSquare[1]-2] == 5) and (board[selectedSquare[0]][selectedSquare[1]-1] == 2 or board[selectedSquare[0]][selectedSquare[1]-1] == 1)):
+    if (selectedSquare[1] >= 2 and (passedBoard[selectedSquare[0]][selectedSquare[1]-2] == 0 or passedBoard[selectedSquare[0]][selectedSquare[1]-2] == 5) and (passedBoard[selectedSquare[0]][selectedSquare[1]-1] == 2 or passedBoard[selectedSquare[0]][selectedSquare[1]-1] == 1)):
         openMoves.append([selectedSquare[0],selectedSquare[1]-2])
-        if(board[selectedSquare[0]][selectedSquare[1]-1] == enemy):
+        if(passedBoard[selectedSquare[0]][selectedSquare[1]-1] == enemy):
             capturedPiecesDict[str([selectedSquare[0],selectedSquare[1]-1])] = len(openMoves) -1
             capturedPieces.append([selectedSquare[0],selectedSquare[1]-1])
     #check right jump
-    if (selectedSquare[1] <= 5 and (board[selectedSquare[0]][selectedSquare[1]+2] == 0 or board[selectedSquare[0]][selectedSquare[1]+2] == 5) and (board[selectedSquare[0]][selectedSquare[1]+1] == 2 or board[selectedSquare[0]][selectedSquare[1]+1] == 1)):
+    if (selectedSquare[1] <= 5 and (passedBoard[selectedSquare[0]][selectedSquare[1]+2] == 0 or passedBoard[selectedSquare[0]][selectedSquare[1]+2] == 5) and (passedBoard[selectedSquare[0]][selectedSquare[1]+1] == 2 or passedBoard[selectedSquare[0]][selectedSquare[1]+1] == 1)):
         openMoves.append([selectedSquare[0],selectedSquare[1]+2])
-        if(board[selectedSquare[0]][selectedSquare[1]+1] == enemy):
+        if(passedBoard[selectedSquare[0]][selectedSquare[1]+1] == enemy):
             capturedPiecesDict[str([selectedSquare[0],selectedSquare[1]+1])] = len(openMoves) -1
             capturedPieces.append([selectedSquare[0],selectedSquare[1]+1])
     #check up/left jump
-    if(selectedSquare[0] >= 2 and selectedSquare[1]-1 >= 2 and (board[selectedSquare[0]-2][selectedSquare[1]-2] == 0 or board[selectedSquare[0]-2][selectedSquare[1]-2] == 5) and (board[selectedSquare[0]-1][selectedSquare[1]-1] == 2 or board[selectedSquare[0]-1][selectedSquare[1]-1] == 1)):
+    if(selectedSquare[0] >= 2 and selectedSquare[1]-1 >= 2 and (passedBoard[selectedSquare[0]-2][selectedSquare[1]-2] == 0 or passedBoard[selectedSquare[0]-2][selectedSquare[1]-2] == 5) and (passedBoard[selectedSquare[0]-1][selectedSquare[1]-1] == 2 or passedBoard[selectedSquare[0]-1][selectedSquare[1]-1] == 1)):
         openMoves.append([selectedSquare[0]-2,selectedSquare[1]-2])
-        if(board[selectedSquare[0]-1][selectedSquare[1]-1] == enemy):
+        if(passedBoard[selectedSquare[0]-1][selectedSquare[1]-1] == enemy):
             capturedPiecesDict[str([selectedSquare[0]-1,selectedSquare[1]-1])] = len(openMoves) -1
             capturedPieces.append([selectedSquare[0]-1,selectedSquare[1]-1])
     #check up/right jump
-    if(selectedSquare[0] >= 2 and selectedSquare[1]+1 <= 5 and (board[selectedSquare[0]-2][selectedSquare[1]+2] == 0 or board[selectedSquare[0]-2][selectedSquare[1]+2] == 5) and (board[selectedSquare[0]-1][selectedSquare[1]+1] == 2 or board[selectedSquare[0]-1][selectedSquare[1]+1] == 1)):
+    if(selectedSquare[0] >= 2 and selectedSquare[1]+1 <= 5 and (passedBoard[selectedSquare[0]-2][selectedSquare[1]+2] == 0 or passedBoard[selectedSquare[0]-2][selectedSquare[1]+2] == 5) and (passedBoard[selectedSquare[0]-1][selectedSquare[1]+1] == 2 or passedBoard[selectedSquare[0]-1][selectedSquare[1]+1] == 1)):
         openMoves.append([selectedSquare[0]-2,selectedSquare[1]+2])
-        if(board[selectedSquare[0]-1][selectedSquare[1]+1] == enemy):
+        if(passedBoard[selectedSquare[0]-1][selectedSquare[1]+1] == enemy):
             capturedPiecesDict[str([selectedSquare[0]-1,selectedSquare[1]+1])] = len(openMoves) -1
             capturedPieces.append([selectedSquare[0]-1,selectedSquare[1]+1])
     #check down/left jump
-    if(selectedSquare[0] <= 11 and selectedSquare[1]-1 >= 2 and (board[selectedSquare[0]+2][selectedSquare[1]-2] == 0 or board[selectedSquare[0]+2][selectedSquare[1]-2] == 5) and (board[selectedSquare[0]+1][selectedSquare[1]-1] == 2 or board[selectedSquare[0]+1][selectedSquare[1]-1] == 1)):
+    if(selectedSquare[0] <= 11 and selectedSquare[1]-1 >= 2 and (passedBoard[selectedSquare[0]+2][selectedSquare[1]-2] == 0 or passedBoard[selectedSquare[0]+2][selectedSquare[1]-2] == 5) and (passedBoard[selectedSquare[0]+1][selectedSquare[1]-1] == 2 or passedBoard[selectedSquare[0]+1][selectedSquare[1]-1] == 1)):
         openMoves.append([selectedSquare[0]+2,selectedSquare[1]-2])
-        if(board[selectedSquare[0]+1][selectedSquare[1]-1] == enemy):
+        if(passedBoard[selectedSquare[0]+1][selectedSquare[1]-1] == enemy):
             capturedPiecesDict[str([selectedSquare[0]+1,selectedSquare[1]-1])] = len(openMoves) -1
             capturedPieces.append([selectedSquare[0]+1,selectedSquare[1]-1])
     #check down/right jump
-    if(selectedSquare[0] <= 11 and selectedSquare[1]+1 <= 5 and (board[selectedSquare[0]+2][selectedSquare[1]+2] == 0 or board[selectedSquare[0]+2][selectedSquare[1]+2] == 5) and (board[selectedSquare[0]+1][selectedSquare[1]+1] == 2 or board[selectedSquare[0]+1][selectedSquare[1]+1] == 1)):
+    if(selectedSquare[0] <= 11 and selectedSquare[1]+1 <= 5 and (passedBoard[selectedSquare[0]+2][selectedSquare[1]+2] == 0 or passedBoard[selectedSquare[0]+2][selectedSquare[1]+2] == 5) and (passedBoard[selectedSquare[0]+1][selectedSquare[1]+1] == 2 or passedBoard[selectedSquare[0]+1][selectedSquare[1]+1] == 1)):
         openMoves.append([selectedSquare[0]+2,selectedSquare[1]+2])
-        if(board[selectedSquare[0]+1][selectedSquare[1]+1] == enemy):
+        if(passedBoard[selectedSquare[0]+1][selectedSquare[1]+1] == enemy):
             capturedPiecesDict[str([selectedSquare[0]+1,selectedSquare[1]+1])] = len(openMoves) -1
             capturedPieces.append([selectedSquare[0]+1,selectedSquare[1]+1])
 
@@ -272,78 +280,113 @@ def cleanBoard(board):
         
         rowIndex += 1
 
-##############################
-gameDisplay= pygame.display.set_mode((display_width,display_height))
-pygame.display.set_caption('Camelot')
-clock = pygame.time.Clock()
+def findAIPieces(board):
+    print 'test'
+    pieces = []
+    
+    
+    rowIndex = 0
+    for row in board:
+        columnIndex = 0
+        
+        for box in row:
+            if box == 2:
+                pieces.append([rowIndex, columnIndex])
+            
+            columnIndex += 1
+        
+        rowIndex += 1
+    return pieces
 
 
-isWinner = False
 #######################################################################################
 while not isWinner:
+    if(whosTurn == 1):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                isWinner = True
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            isWinner = True
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                #check which square the mouseclick is in
-                arrayIndex = whichSquareWasClicked(event.pos)
-                squareStatus = board[arrayIndex[1]][arrayIndex[0]]
-                moveableSquare = []
-                capturedPieces = []
-                
-                #user selects their own piece
-                if squareStatus == 1:
-                    #change selected square to selectedPlayer1
-                    board[lastSelected[0]][lastSelected[1]] = 1
-                    changeSquareToColor(arrayIndex, 4)
-                    #loop through board, check every square that is green, and color it white
-                    cleanBoard(board)
-                    lastSelected = (arrayIndex[1],arrayIndex[0])
-                    #find squares to move to. recolor them
-                    response = findMoveableSquares((arrayIndex[1],arrayIndex[0]))
-                    moveableSquare = response[0]
-                    capturedPieces = response[1]
-                    #response[0] = openMoves
-                    #response[1] = capturedPieces
-                    #color all openMoves green. 
-                    for square in response[0]:
-                        flippedAxisIndex = [square[1],square[0]]
-                        changeSquareToColor(flippedAxisIndex, 6)
-                #user selects space to move to
-                if squareStatus == 6:
-                    #move lastSelected to new square, paint lastSelected to white, 
-                    changeSquareToColor(arrayIndex, 1)
-                    changeSquareToColor([lastSelected[1],lastSelected[0]], 0)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    #check which square the mouseclick is in
+                    arrayIndex = whichSquareWasClicked(event.pos)
+                    squareStatus = board[arrayIndex[1]][arrayIndex[0]]
+                    moveableSquare = []
+                    capturedPieces = []
                     
-                    #if there was a jump, paint captured piece to white
-                    xMovement = abs(lastSelected[1] - arrayIndex[0])
-                    yMovement = abs(lastSelected[0] - arrayIndex[1])
-                    if(xMovement == 2 or yMovement == 2):
-                        #a jump was made, if jumped over enemy piece, paint enemy piece white
-                        #figure out which piece was jumped over
-                        middlePieceXIndex = arrayIndex[0]
-                        middlePieceYIndex = arrayIndex[1]
+                    #user selects their own piece
+                    if squareStatus == 1:
+                        #change selected square to selectedPlayer1
+                        board[lastSelected[0]][lastSelected[1]] = 1
+                        changeSquareToColor(arrayIndex, 4)
+                        #loop through board, check every square that is green, and color it white
+                        cleanBoard(board)
+                        lastSelected = (arrayIndex[1],arrayIndex[0])
+                        #find squares to move to. recolor them
+                        response = findMoveableSquares((arrayIndex[1],arrayIndex[0]), board)
+                        print 'moveable squares: ';
+                        print response;
+                        moveableSquare = response[0]
+                        capturedPieces = response[1]
+                        #response[0] = openMoves
+                        #response[1] = capturedPieces
+                        #color all openMoves green. 
+                        for square in response[0]:
+                            flippedAxisIndex = [square[1],square[0]]
+                            changeSquareToColor(flippedAxisIndex, 6)
+                    #user selects space to move to
+                    if squareStatus == 6:
+                        #move lastSelected to new square, paint lastSelected to white, 
+                        changeSquareToColor(arrayIndex, 1)
+                        changeSquareToColor([lastSelected[1],lastSelected[0]], 0)
+                        
+                        #if there was a jump, paint captured piece to white
+                        xMovement = abs(lastSelected[1] - arrayIndex[0])
+                        yMovement = abs(lastSelected[0] - arrayIndex[1])
+                        if(xMovement == 2 or yMovement == 2):
+                            #a jump was made, if jumped over enemy piece, paint enemy piece white
+                            #figure out which piece was jumped over
+                            middlePieceXIndex = arrayIndex[0]
+                            middlePieceYIndex = arrayIndex[1]
 
-                        if(xMovement == 2):
-                            if(arrayIndex[0] > lastSelected[1]):
-                                middlePieceXIndex = arrayIndex[0]-1
-                            else:
-                                middlePieceXIndex = arrayIndex[0]+1
-                        if(yMovement == 2):
-                            if(arrayIndex[1] < lastSelected[0]):
-                                middlePieceYIndex = arrayIndex[1]+1
-                            else:
-                                middlePieceYIndex = arrayIndex[1]-1
-                        #check to see if piece jumped over is enemy piece
-                        if(board[middlePieceYIndex][middlePieceXIndex] == 2):
-                            changeSquareToColor([middlePieceXIndex,middlePieceYIndex],0)
+                            if(xMovement == 2):
+                                if(arrayIndex[0] > lastSelected[1]):
+                                    middlePieceXIndex = arrayIndex[0]-1
+                                else:
+                                    middlePieceXIndex = arrayIndex[0]+1
+                            if(yMovement == 2):
+                                if(arrayIndex[1] < lastSelected[0]):
+                                    middlePieceYIndex = arrayIndex[1]+1
+                                else:
+                                    middlePieceYIndex = arrayIndex[1]-1
+                            #check to see if piece jumped over is enemy piece
+                            if(board[middlePieceYIndex][middlePieceXIndex] == 2):
+                                changeSquareToColor([middlePieceXIndex,middlePieceYIndex],0)
 
-                    #cleanup after move
-                    lastSelected= (arrayIndex[1],arrayIndex[0])
-                    cleanBoard(board)
+                        #cleanup after move
+                        lastSelected= (arrayIndex[1],arrayIndex[0])
+                        cleanBoard(board)
+                        whosTurn = 2
+    elif whosTurn == 2:
+        #run AI
+        #find how many AI pieces there are on the board.
+        print 'board'
+        print board
+        aIPieces = findAIPieces(board)
+
+        allMoves = []
+        for piece in aIPieces:
+            print piece
+            allMoves.append(findMoveableSquares(piece, board))
+        
+        print 'allMoves'
+        print allMoves #allmoves is an array of touples. touple[0] == the list of moves for each piece. touple[1] == the list of pieces which will be captured if that piece moves.
+        
+
+
+        print 'Turn Ended'
+        whosTurn = 1
+
 
 
 ##########################
